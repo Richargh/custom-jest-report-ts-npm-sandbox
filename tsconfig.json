@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "es2020",
+    "strict": true,
+
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "paths": {
+      "src/*": ["src/*"],
+      "tests/*": ["tests/*"]
+    },
+
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
