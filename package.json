@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npx jest --json --outputFile=reports/jest.json",
-    "build": "tsc --outDir build"
+    "build": "tsc --outDir build",
+    "generateHtmlReport": "node scripts/customHtmlReport.mjs"
   },
   "author": "",
   "license": "ISC",
