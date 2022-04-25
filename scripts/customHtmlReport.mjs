@@ -50,14 +50,14 @@ function writeMain(writableStream, groups){
 function writeGroups(writableStream, groups, level){
     groups.forEach((value, key) => {
         if(value instanceof Map){
-            writableStream.write(`${levelSpace(level)}<li>${key}\n`);
+            writableStream.write(`${levelSpace(level)}<li>${boldifyGherkin(key)}\n`);
             writableStream.write(`${levelSpace(level + 1)}<ul>\n`);
             writeGroups(writableStream, value, level + 2);
             writableStream.write(`${levelSpace(level + 1)}</ul>\n`);
             writableStream.write(`${levelSpace(level)}</li>\n`);
         }
         else {
-            writableStream.write(`${' '.repeat(level * 4)}<li>${key}: ${value}</li>\n`);
+            writableStream.write(`${' '.repeat(level * 4)}<li>${boldifyGherkin(key)}: ${value}</li>\n`);
         }
     });
 }
@@ -84,6 +84,15 @@ function writeBody(writableStream, groups){
 }
 function writeFoot(writableStream){
     writableStream.write('</html>\n');
+}
+
+function boldifyGherkin(text){
+    let t = text;
+    t = t.replace(/given/i, '<b>Given</b>');
+    t = t.replace(/when/i, '<b>When</b>');
+    t = t.replace(/then/i, '<b>Then</b>');
+
+    return t;
 }
 
 function levelSpace(level){
