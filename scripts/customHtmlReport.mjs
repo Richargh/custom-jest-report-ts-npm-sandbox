@@ -5,10 +5,12 @@ function main(){
 
         const data = readFileSync('./reports/jest.json', 'utf8');
         const report = JSON.parse(data);
+
+        const groups = groupTestResults(report);
     
         const writableStream = createWriteStream('./reports/jest.html', {encoding: 'utf8'});
         writeHead(writableStream);
-        writeBody(writableStream, report);
+        writeBody(writableStream, groups);
         writeFoot(writableStream);
         writableStream.end();
     } catch (err) {
@@ -16,15 +18,48 @@ function main(){
     }
 }
 
-function writeMain(writableStream, report){
-    writableStream.write('      <h2>Tests</h2>\n');
-    writableStream.write('      <ul>\n');
+function groupTestResults(report){
+    const groups = new Map();
+
     report.testResults.forEach(testResult => {
-        testResult.assertionResults.forEach(r => {
-            writableStream.write(`          <li>${r.fullName}</li>\n`);
+        testResult.assertionResults.forEach(assertionResult => {
+            let currentGroup = groups;
+            assertionResult.ancestorTitles.forEach(ancestor => {
+                if(!currentGroup.has(ancestor)){
+                    currentGroup.set(ancestor, new Map());
+                }
+                currentGroup = currentGroup.get(ancestor);
+            });
+            
+            currentGroup.set(assertionResult.title, assertionResult.status);
         });
     });
-    writableStream.write('      </ul>\n');
+
+    return groups;
+}
+
+function writeMain(writableStream, groups){
+    const level = 2;
+    writableStream.write(`${levelSpace(level)}<h2>Tests</h2>\n`);
+    writableStream.write(`${levelSpace(level)}<ul>\n`);
+    writeGroups(writableStream, groups, 3);
+    writableStream.write(`${levelSpace(level)}</ul>\n`);
+}
+
+
+function writeGroups(writableStream, groups, level){
+    groups.forEach((value, key) => {
+        if(value instanceof Map){
+            writableStream.write(`${levelSpace(level)}<li>${key}\n`);
+            writableStream.write(`${levelSpace(level + 1)}<ul>\n`);
+            writeGroups(writableStream, value, level + 2);
+            writableStream.write(`${levelSpace(level + 1)}</ul>\n`);
+            writableStream.write(`${levelSpace(level)}</li>\n`);
+        }
+        else {
+            writableStream.write(`${' '.repeat(level * 4)}<li>${key}: ${value}</li>\n`);
+        }
+    });
 }
 
 function writeHead(writableStream){
@@ -37,18 +72,22 @@ function writeHead(writableStream){
     writableStream.write('  <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css"></link>');
     writableStream.write('</head>\n');
 }
-function writeBody(writableStream, report){
+function writeBody(writableStream, groups){
     writableStream.write('<body>\n');
     writableStream.write('  <header>\n');
     writableStream.write('      <h1>My Custom Jest Report</h1>\n');
     writableStream.write('  </header>\n');
     writableStream.write('  <main>\n');
-    writeMain(writableStream, report);
+    writeMain(writableStream, groups);
     writableStream.write('  </main>\n');
     writableStream.write('</body>\n');
 }
 function writeFoot(writableStream){
     writableStream.write('</html>\n');
+}
+
+function levelSpace(level){
+    return ' '.repeat((level)*4);
 }
 
 main();

@@ -1,0 +1,12 @@
+= Custom Jest Report (Sandbox)
+
+*Features*:
+
+* Grouping of Reports based on describe/it/test hierarchy, not test file location
+* link:https://simplecss.org/[Simple CSS]
+
+== Usage
+
+* Run tests `npm run test`
+* Generate Report `npm run generateHtmlReport`
+* View the result in `reports/jest.html`
